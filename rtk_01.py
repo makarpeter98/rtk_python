@@ -8,13 +8,13 @@ from gps_handler import GPSHandler
 from gps_data import GPSData
 from database_handler import DataBaseHandler
 
-# --- Megosztott objektum és lock ---
+# --- Megosztott objektumok
 my_gps_data = GPSData()
 gps_lock = threading.Lock()
 save_queue = queue.Queue()
 stop_threads = False  # a thread-ek leállításához
 my_gps_handler = None  # globális GPSHandler objektum
-comment_text = ""  # a GUI-ból átadott komment
+comment_text = ""  # a GUI-ból globális komment
 
 # --- GPS szál ---
 def gps_thread():
@@ -26,7 +26,8 @@ def gps_thread():
         with gps_lock:
             my_gps_handler.get_gps_data(my_gps_data)
             print(f"lat={my_gps_data.latitude} lat_err={my_gps_data.latitude_error} "
-                  f"lon={my_gps_data.longitude} lon_err={my_gps_data.longitude_error}")
+                  f"lon={my_gps_data.longitude} lon_err={my_gps_data.longitude_error}"
+                  f"mode={my_gps_data.mode}")
         time.sleep(0.5)
 
 # --- DB szál ---
@@ -40,7 +41,13 @@ def db_thread():
             continue
         with gps_lock:
             try:
-                db_handler.save_gps_data(my_gps_data, comment_text)
+                if len(comment_text) > 0:
+                    my_gps_data.comment = comment_text   
+                else:
+                    my_gps_data.comment = None
+                
+                db_handler.save_gps_data(my_gps_data)
+                    
                 print(f"Mentve: lat={my_gps_data.latitude}, lon={my_gps_data.longitude}, comment={comment_text}")
             except Exception as e:
                 print(f"Hiba DB: {e}")
@@ -51,10 +58,11 @@ def gui_thread():
     global stop_threads, comment_text
 
     def save_button_clicked():
-        global comment_text  # <-- fontos, különben lokális lesz
+        global comment_text
         comment_text = comment_entry.get()
         save_queue.put(True)
         with gps_lock:
+            my_gps_data.comment = comment_text
             status_label.config(
                 text=f"Mentve: lat={my_gps_data.latitude:.6f}, lon={my_gps_data.longitude:.6f}\nComment: {comment_text}"
             )

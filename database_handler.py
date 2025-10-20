@@ -15,31 +15,32 @@ class DataBaseHandler:
             latitude_error REAL,
             longitude_error REAL,
             speed REAL,
+            mode TEXT,
             comment TEXT
         )""")
 
         self.conn.commit()
         self.conn.close()
 
-    def save_gps_data(self, gps_data, comment="Test"):
-        """Menti a GPS adatokat az adatbázisba, opcionális kommenttel."""
+    def save_gps_data(self, gps_data):
         self.conn = sqlite3.connect("gps_data.db")
         self.cursor = self.conn.cursor()
 
         print(f"Mentés: lat={gps_data.latitude} lon={gps_data.longitude} "
               f"lat_err={gps_data.latitude_error} lon_err={gps_data.longitude_error} "
-              f"speed={gps_data.speed} comment={comment}")
+              f"speed={gps_data.speed} mode={gps_data.mode} comment={gps_data.comment}")
 
         self.cursor.execute("""
-            INSERT INTO gps_log (latitude, longitude, latitude_error, longitude_error, speed, comment)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO gps_log (latitude, longitude, latitude_error, longitude_error, speed, mode, comment)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (
             gps_data.latitude or 0.0,
             gps_data.longitude or 0.0,
             gps_data.latitude_error or 0.0,
             gps_data.longitude_error or 0.0,
             gps_data.speed or 0.0,
-            comment
+            gps_data.mode or None,
+            gps_data.comment or None
         ))
 
         self.conn.commit()
