@@ -8,6 +8,7 @@ venv/
 
 # Adatbázis
 gps_data.db
+.gps_data.db
 
 # OS-specifikus fájlok
 .DS_Store
