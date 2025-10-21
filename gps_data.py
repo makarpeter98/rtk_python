@@ -10,4 +10,5 @@ class GPSData:
 		self.mode = None
 		self.speed = None
 		self.comment = None
+		self.time = None
 		

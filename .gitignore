@@ -1,0 +1,26 @@
+# Python bytecode fájlok
+__pycache__/
+
+# Virtuális környezet
+venv/
+*.venv/
+.env/
+
+# Adatbázis
+gps_data.db
+.gps_data.db
+
+# OS-specifikus fájlok
+.DS_Store
+Thumbs.db
+
+# Szerkesztő-specifikus
+*.swp
+*.swo
+.idea/
+.vscode/
+RTK_test.py
+gps-reset.sh
+gps_init_fixed.py
+database_handler_fixed.py
+

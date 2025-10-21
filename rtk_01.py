@@ -3,6 +3,7 @@ import queue
 import time
 import tkinter as tk
 import argparse
+import copy
 
 from gps_handler import GPSHandler
 from gps_data import GPSData
@@ -22,13 +23,31 @@ def gps_thread():
     my_gps_handler = GPSHandler()
     my_gps_handler.connect_to_gps()
     print("gps_thread elindult")
+
+    RED = "\033[31m"
+    GREEN = "\033[32m"
+    YELLOW = "\033[33m"
+    RESET = "\033[0m"
+
     while not stop_threads:
+        new_data = my_gps_handler.get_gps_data()  # csak egy új TPV adat
+        if new_data is None:
+            time.sleep(0.05)
+            continue
+        if my_gps_data.latitude != new_data.latitude and my_gps_data.longitude != new_data.longitude:
+            print(f"{YELLOW}lat={my_gps_data.latitude} lon={my_gps_data.longitude} mode={my_gps_data.mode} speed={my_gps_data.speed}{RESET}")
+
         with gps_lock:
-            my_gps_handler.get_gps_data(my_gps_data)
-            print(f"lat={my_gps_data.latitude} lat_err={my_gps_data.latitude_error} "
-                  f"lon={my_gps_data.longitude} lon_err={my_gps_data.longitude_error}"
-                  f"mode={my_gps_data.mode}")
-        time.sleep(0.5)
+            my_gps_data.time = new_data.time
+            my_gps_data.latitude = new_data.latitude
+            my_gps_data.longitude = new_data.longitude
+            my_gps_data.latitude_error = new_data.latitude_error
+            my_gps_data.longitude_error = new_data.longitude_error
+            my_gps_data.speed = new_data.speed
+            my_gps_data.mode = new_data.mode
+
+            
+
 
 # --- DB szál ---
 def db_thread():
@@ -42,13 +61,15 @@ def db_thread():
         with gps_lock:
             try:
                 if len(comment_text) > 0:
-                    my_gps_data.comment = comment_text   
+                    my_gps_data.comment = comment_text
                 else:
                     my_gps_data.comment = None
-                
+
                 db_handler.save_gps_data(my_gps_data)
-                    
-                print(f"Mentve: lat={my_gps_data.latitude}, lon={my_gps_data.longitude}, comment={comment_text}")
+
+                print(
+                    f"Mentve: lat={my_gps_data.latitude}, lon={my_gps_data.longitude}, comment={comment_text}"
+                )
             except Exception as e:
                 print(f"Hiba DB: {e}")
         save_queue.task_done()
@@ -64,7 +85,7 @@ def gui_thread():
         with gps_lock:
             my_gps_data.comment = comment_text
             status_label.config(
-                text=f"Mentve: lat={my_gps_data.latitude:.6f}, lon={my_gps_data.longitude:.6f}\nComment: {comment_text}"
+                text=f"Mentve: lat={my_gps_data.latitude}, lon={my_gps_data.longitude}\nComment: {comment_text}"
             )
         print(f"comment={comment_text}")
 
@@ -94,11 +115,16 @@ def gui_thread():
 
     root.mainloop()
 
+
 # --- Fő program ---
 def main():
     parser = argparse.ArgumentParser(description="RTK GUI + GPS")
-    parser.add_argument("-i", "--init", type=str, help="GPS inicializálása", required=True)
-    parser.add_argument("-oi", "--only_init", type=str, help="Csak a GPS inicializálása majd kilépés")
+    parser.add_argument(
+        "-i", "--init", type=str, help="GPS inicializálása", required=True
+    )
+    parser.add_argument(
+        "-oi", "--only_init", type=str, help="Csak a GPS inicializálása majd kilépés"
+    )
     args = parser.parse_args()
 
     if args.init == "True":
@@ -112,9 +138,10 @@ def main():
     t_db = threading.Thread(target=db_thread, daemon=True)
     t_gui = threading.Thread(target=gui_thread)
 
-    t_gps.start()
+    
     t_db.start()
     t_gui.start()
+    t_gps.start()
 
     t_gui.join()
 

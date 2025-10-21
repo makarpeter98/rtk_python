@@ -9,7 +9,7 @@ class DataBaseHandler:
         self.cursor.execute("""
         CREATE TABLE IF NOT EXISTS gps_log (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            timestamp DATETIME,
             latitude REAL,
             longitude REAL,
             latitude_error REAL,
@@ -26,14 +26,13 @@ class DataBaseHandler:
         self.conn = sqlite3.connect("gps_data.db")
         self.cursor = self.conn.cursor()
 
-        print(f"Mentés: lat={gps_data.latitude} lon={gps_data.longitude} "
-              f"lat_err={gps_data.latitude_error} lon_err={gps_data.longitude_error} "
-              f"speed={gps_data.speed} mode={gps_data.mode} comment={gps_data.comment}")
+        print(f"Mentés: time={gps_data.time} lat={gps_data.latitude} lon={gps_data.longitude} lat_err={gps_data.latitude_error} lon_err={gps_data.longitude_error} speed={gps_data.speed} mode={gps_data.mode} comment={gps_data.comment}")
 
         self.cursor.execute("""
-            INSERT INTO gps_log (latitude, longitude, latitude_error, longitude_error, speed, mode, comment)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO gps_log (timestamp, latitude, longitude, latitude_error, longitude_error, speed, mode, comment)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (
+            gps_data.time or 0.0,
             gps_data.latitude or 0.0,
             gps_data.longitude or 0.0,
             gps_data.latitude_error or 0.0,
