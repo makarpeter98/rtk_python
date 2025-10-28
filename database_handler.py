@@ -26,7 +26,7 @@ class DataBaseHandler:
         self.conn = sqlite3.connect("gps_data.db")
         self.cursor = self.conn.cursor()
 
-        print(f"Mentés: time={gps_data.time} lat={gps_data.latitude} lon={gps_data.longitude} lat_err={gps_data.latitude_error} lon_err={gps_data.longitude_error} speed={gps_data.speed} mode={gps_data.mode} comment={gps_data.comment}")
+        print(f"db_handler: Mentés: time={gps_data.time} lat={gps_data.latitude} lon={gps_data.longitude} lat_err={gps_data.latitude_error} lon_err={gps_data.longitude_error} speed={gps_data.speed} mode={gps_data.mode} comment={gps_data.comment}")
 
         self.cursor.execute("""
             INSERT INTO gps_log (timestamp, latitude, longitude, latitude_error, longitude_error, speed, mode, comment)

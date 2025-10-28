@@ -139,6 +139,6 @@ class GPSHandler:
                 self.gps_data_ms_to_km(gps_data)
                 self.gps_data_time_to_bp(gps_data)
                 
-                #print(f"time={gps_data.time}")
+                print(f"lon = {lon} lat={lat} time={gps_data.time}")
                 
                 return gps_data
