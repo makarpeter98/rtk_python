@@ -18,32 +18,29 @@ stop_event = threading.Event()  # Mutable stop jelzés
 
 my_gps_handler = None
 
+def test_thread():
+    
+    global my_gps_data
+    
+    print("Test thread elindult")
+    
+    while True:
+        print(f"lat={my_gps_data.latitude} lon={my_gps_data.longitude} speed= {my_gps_data.speed}")
+        time.sleep(1.5)
+
 # --- GPS szál ---
 def gps_thread():
-    global my_gps_handler
+    global my_gps_data
     my_gps_handler = GPSHandler()
-    my_gps_handler.connect_to_gps()
+    #my_gps_handler.connect_to_gps()
     print("gps_thread elindult")
-
+    
+    
     while not stop_event.is_set():
-        new_data = my_gps_handler.get_gps_data()
-        if new_data is None:
-            time.sleep(0.05)
-            continue
-
-        with gps_lock:
-            # Módosítjuk az objektum mezőit, nem újraassignáljuk
-            my_gps_data.time = new_data.time
-            my_gps_data.latitude = new_data.latitude
-            my_gps_data.longitude = new_data.longitude
-            my_gps_data.latitude_error = new_data.latitude_error
-            my_gps_data.longitude_error = new_data.longitude_error
-            my_gps_data.speed = new_data.speed
-            my_gps_data.mode = new_data.mode
-
-        print(f"lat={my_gps_data.latitude} lon={my_gps_data.longitude}")
-        time.sleep(0.5)
-
+        my_gps_data = GPSData()
+        my_gps_handler.get_gps_data(my_gps_data)
+        print(f"ido= {time.time() - measure_start}")
+    
     my_gps_handler.close_gps_connection()
 
 # --- DB szál ---
@@ -70,6 +67,7 @@ def socket_thread():
 
 # --- GUI ---
 def start_gui():
+    global my_gps_data
     gui_handler = GUIHandler(save_queue, gps_lock, my_gps_data)
     gui_handler.run()  # mainloop fő szálon
 
@@ -90,6 +88,7 @@ def main():
     threading.Thread(target=gps_thread, daemon=True).start()
     threading.Thread(target=db_thread, daemon=True).start()
     threading.Thread(target=socket_thread, daemon=True).start()
+    threading.Thread(target=test_thread, daemon=True).start()
 
     # GUI fő szálon
     start_gui()
