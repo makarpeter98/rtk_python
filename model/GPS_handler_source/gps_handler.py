@@ -1,9 +1,10 @@
-from gps_data import GPSData
+from model.GPS_handler_source.gps_data import GPSData
 import subprocess
 from gps3 import gps3
 import time
 from datetime import datetime
 from zoneinfo import ZoneInfo
+import copy
 
 
 class GPSHandler:
@@ -135,10 +136,8 @@ class GPSHandler:
         measure_start  = time.time()
         
         for new_data in gps_socket:
-            if new_data:
-                    
-                try:
-                    
+                if new_data:
+
                     data_stream.unpack(new_data)
                     tpv = data_stream.TPV  # Time-Position-Velocity objektum dict-szerűen
                     lat = tpv.get('lat', None)
@@ -149,23 +148,47 @@ class GPSHandler:
                     time_gps = tpv.get('time', None)
                     latitude_error = tpv.get("epy")
                     longitude_error = tpv.get("epx")
+                    
+                    latitude_error = tpv.get("epy", None)
+                    longitude_error = tpv.get("epx", None)
 
-                    if time.time() - measure_start  >= 5.0:
-                        print(f"{RED}5s meres lejart{RESET}")
-                        measure_start= time.time()                        
-                        #avg_speed = sum(speeds) / len(speeds)
+                    # Kényszerítés float típusra, ha nem None
+                    try:
+                        latitude_error = float(latitude_error) if latitude_error is not None else float('inf')
+                    except ValueError:
+                        latitude_error = float('inf')
+
+                    try:
+                        longitude_error = float(longitude_error) if longitude_error is not None else float('inf')
+                    except ValueError:
+                        longitude_error = float('inf')
+                        
+                    #print(f"lat = {lat} lon = {lon}")
+                    
+                
+                    if time.time() - measure_start  >= 5.0:  
+                        my_gps_data.latitude = copy.deepcopy(best_lat)
+                        my_gps_data.longitude = copy.deepcopy(best_lon)
+                        my_gps_data.latitude_error = copy.deepcopy(best_lat_err)
+                        my_gps_data.longitude_error = copy.deepcopy(best_lon_err)
+                        my_gps_data.time = copy.deepcopy(time_gps)
+                        my_gps_data.speed = copy.deepcopy(avg_speed)
+                        my_gps_data.mode = f"fix:{'3D' if mode==3 else '2D' if mode==2 else 'no'}" 
+                        self.gps_data_ms_to_km(my_gps_data) 
+                        self.gps_data_time_to_bp(my_gps_data)
+                        measure_start= time.time()          
                         best_lat = None
                         best_lon = None
                         best_lat_err = None
                         best_lon_err = None
                         speeds = []
                         altitudes = []
-                        avg_speed = 0.0
+                        avg_speed = 0.0   
+                        my_gps_data.measure_fixed = True
+                        print(f"{RED}Frissítés{RESET}")
                         
-                    else:
-                        #print(f"lat = {lat} lon = {lon} lat_err = {latitude_error} lon_err = {longitude_error}")
-                        #print(f"{GREEN}{time.time() - measure_start}{RESET}")
-                        #print(f"best_lat= {best_lat} best_lon= {best_lat} best_lat_err= {best_lat_err} best_lon_err= {best_lon_err}")                        
+                    else:   
+                        my_gps_data.measure_fixed = False
                         try:
                             s = float(speed)
                             speeds.append(s)
@@ -177,43 +200,35 @@ class GPSHandler:
                         for i, elem in enumerate(speeds):
                             sum_speed = sum_speed + elem
 
-                        avg_speed = sum_speed / len(speeds)
-                        avg_speed = round(avg_speed, 3)
-                        #print(avg_speed)
+                        avg_speed = speed
+                        
                         
                         if best_lat is None and best_lat_err is None:
-                            print(f"Lon es lon_err inicializalas lat= {lat} lat_err= {latitude_error}")
+                            #print(f"Lon es lon_err inicializalas lat= {lat} lat_err= {latitude_error}")
                             best_lat = lat
                             best_lat_err = latitude_error
                         
                         if best_lon is None and best_lon_err is None:
-                            print(f"Lon es lon_err inicializalas lon= {lon} lat= {longitude_error}")
+                            #print(f"Lon es lon_err inicializalas lon= {lon} lat= {longitude_error}")
                             best_lon = lon
                             best_lon_err = longitude_error
                             
                         if latitude_error < best_lat_err:
-                            print(f"{GREEN}talalt jobb szelesseget: {lat}{RESET}")
+                            #print(f"{GREEN}talalt jobb szelesseget: {lat}{RESET}")
                             best_lat_err = latitude_error
                             best_lat = lat
                         
                         if longitude_error < best_lon_err:
-                            print(f"{GREEN}talalt jobb hosszusagot: {lon}{RESET}")
+                            #print(f"{GREEN}talalt jobb hosszusagot: {lon}{RESET}")
                             best_lon_err = longitude_error
                             best_lon = lon
 
-                    my_gps_data.latitude = best_lat
-                    my_gps_data.longitude = best_lon
+                    """my_gps_data.latitude = copy.deepcopy(best_lat)
+                    my_gps_data.longitude = copy.deepcopy(best_lon)
                     my_gps_data.latitude_error = best_lat_err
                     my_gps_data.longitude_error = best_lon_err
                     my_gps_data.time = time_gps
                     my_gps_data.speed = avg_speed
                     my_gps_data.mode = f"fix:{'3D' if mode==3 else '2D' if mode==2 else 'no'}" 
-                    #self.gps_data_ms_to_km(my_gps_data) 
-                    #self.gps_data_time_to_bp(my_gps_data)
-
-                except Exception:
-                    # Elnyomjuk a hibát, nem írjuk ki semmit
-                    continue                
-
-        print("Eddig eljut")
-        #time.sleep(2.45)
+                    self.gps_data_ms_to_km(my_gps_data) 
+                    self.gps_data_time_to_bp(my_gps_data)"""

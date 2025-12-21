@@ -3,30 +3,47 @@ import queue
 import time
 import tkinter as tk
 import argparse
+import sys
 
-from gps_handler import GPSHandler
-from gps_data import GPSData
-from database_handler import DataBaseHandler
-from gui_handler import GUIHandler
-from socket_handler import SocketHandler
+from model.GPS_handler_source.gps_handler import GPSHandler
+from model.GPS_handler_source.gps_handler import GPSData
+from model.DB_handler_source.database_handler import DataBaseHandler
+from viewcontroller.Main_GUI.gui_handler_main import GUIHandler
+from viewcontroller.Socket_controller.socket_handler import SocketHandler
+from viewcontroller.Graphing.gps_graph_gui import GPSGraphGUI
+
+# --- Csak a hibakiírások (stderr) elnyomása ---
+class DevNull:
+    def write(self, msg):
+        pass
+    def flush(self):
+        pass
+
+
 
 # --- Megosztott objektumok ---
 my_gps_data = GPSData()
 gps_lock = threading.Lock()
 save_queue = queue.Queue()
 stop_event = threading.Event()  # Mutable stop jelzés
+RED = "\033[31m"
+GREEN = "\033[32m"
+RESET = "\033[0m"
 
-my_gps_handler = None
+my_gps_handler = None        
 
-def test_thread():
-    
-    global my_gps_data
-    
-    print("Test thread elindult")
-    
-    while True:
-        print(f"lat={my_gps_data.latitude} lon={my_gps_data.longitude} speed= {my_gps_data.speed}")
-        time.sleep(1.5)
+def print_all_gps_data(my_gps_data):
+    print(
+                f"  GPS adatok\n"
+                f"  Szélesség:       {my_gps_data.latitude} fok\n"
+                f"  Hosszúság:       {my_gps_data.longitude} fok\n"
+                f"  Szélességi hiba: {my_gps_data.latitude_error}m\n"
+                f"  Hosszúsági hiba: {my_gps_data.longitude_error}m\n"
+                f"  Sebesség:        {my_gps_data.speed}km/h\n"
+                f"  Mód:             {my_gps_data.mode}\n"
+                f"  Megjegyzés:      {my_gps_data.comment}\n"
+                f"  Idő:             {my_gps_data.time}\n"
+            )
 
 # --- GPS szál ---
 def gps_thread():
@@ -70,12 +87,20 @@ def start_gui():
     global my_gps_data
     gui_handler = GUIHandler(save_queue, gps_lock, my_gps_data)
     gui_handler.run()  # mainloop fő szálon
+    
+def start_Graph_GUI():
+    global my_gps_data
+    graph_gui = GPSGraphGUI(gps_lock, my_gps_data)
+    graph_gui.run()
+
+    
 
 # --- Fő program ---
 def main():
     parser = argparse.ArgumentParser(description="RTK GUI + GPS")
     parser.add_argument("-i", "--init", type=str, required=True)
     parser.add_argument("-oi", "--only_init", type=str)
+    #parser.add_argument("--graph", action="store_true", help="Indítsa el a GPS grafikon GUI-t")
     args = parser.parse_args()
 
     if args.init == "True":
@@ -88,8 +113,10 @@ def main():
     threading.Thread(target=gps_thread, daemon=True).start()
     threading.Thread(target=db_thread, daemon=True).start()
     threading.Thread(target=socket_thread, daemon=True).start()
-    threading.Thread(target=test_thread, daemon=True).start()
-
+    #threading.Thread(target=start_Graph_GUI, daemon=True).start()
+    
+    #sys.stderr = DevNull()  # Exception-ök és hibák nem fognak látszódni
+    my_gps_data.add_callback(print_all_gps_data)
     # GUI fő szálon
     start_gui()
 

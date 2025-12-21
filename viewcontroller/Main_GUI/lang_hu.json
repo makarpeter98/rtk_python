@@ -1,0 +1,37 @@
+{
+    "menu": {
+        "measurement": "Mérés",
+        "graph": "Gráf",
+        "database": "Adatbázis"
+    },
+
+    "measurement_view": {
+        "title": "Mérés",
+        "comment_label": "Megjegyzés:",
+        "save_button": "GPS adat mentése",
+        "status_wait": "Várakozás GPS adatra...",
+        "status_saved": "Mentve!",
+        
+        "fields": {
+            "Latitude": "Szélesség",
+            "Longitude": "Hosszúság",
+            "Latitude error": "Szélesség hiba",
+            "Longitude error": "Hosszúság hiba",
+            "Speed": "Sebesség",
+            "Mode": "Mód",
+            "Comment": "Megjegyzés",
+            "Time": "Idő"
+        },
+        
+        "units": {
+            "Latitude": "°",
+            "Longitude": "°",
+            "Latitude error": "m",
+            "Longitude error": "m",
+            "Speed": "km/h",
+            "Mode": "",
+            "Comment": "",
+            "Time": ""
+        }
+    }
+}
