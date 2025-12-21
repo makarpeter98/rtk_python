@@ -5,11 +5,11 @@ import tkinter as tk
 import argparse
 import sys
 
-from model.GPS_handler_source.gps_handler import GPSHandler
-from model.GPS_handler_source.gps_handler import GPSData
-from model.DB_handler_source.database_handler import DataBaseHandler
+from model.GPS_handler.gps_handler import GPSHandler
+from model.GPS_handler.gps_handler import GPSData
+from model.DB_handler.database_handler import DataBaseHandler
 from viewcontroller.Main_GUI.gui_handler_main import GUIHandler
-from viewcontroller.Socket_controller.socket_handler import SocketHandler
+from model.Socket_handler.socket_handler import SocketHandler
 from viewcontroller.Graphing.gps_graph_gui import GPSGraphGUI
 
 # --- Csak a hibakiírások (stderr) elnyomása ---

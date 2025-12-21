@@ -1,4 +1,4 @@
-from model.GPS_handler_source.gps_data import GPSData
+from model.GPS_handler.gps_data import GPSData
 import subprocess
 from gps3 import gps3
 import time
