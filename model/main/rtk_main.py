@@ -10,7 +10,7 @@ from model.GPS_handler.gps_handler import GPSData
 from model.DB_handler.database_handler import DataBaseHandler
 from viewcontroller.Main_GUI.gui_handler_main import GUIHandler
 from model.Socket_handler.socket_handler import SocketHandler
-from viewcontroller.Graphing.gps_graph_gui import GPSGraphGUI
+#from viewcontroller.Graphing.gps_graph_gui import GPSGraphGUI
 
 # --- Csak a hibakiírások (stderr) elnyomása ---
 class DevNull:
@@ -87,11 +87,6 @@ def start_gui():
     global my_gps_data
     gui_handler = GUIHandler(save_queue, gps_lock, my_gps_data)
     gui_handler.run()  # mainloop fő szálon
-    
-def start_Graph_GUI():
-    global my_gps_data
-    graph_gui = GPSGraphGUI(gps_lock, my_gps_data)
-    graph_gui.run()
 
     
 
@@ -113,7 +108,6 @@ def main():
     threading.Thread(target=gps_thread, daemon=True).start()
     threading.Thread(target=db_thread, daemon=True).start()
     threading.Thread(target=socket_thread, daemon=True).start()
-    #threading.Thread(target=start_Graph_GUI, daemon=True).start()
     
     #sys.stderr = DevNull()  # Exception-ök és hibák nem fognak látszódni
     my_gps_data.add_callback(print_all_gps_data)

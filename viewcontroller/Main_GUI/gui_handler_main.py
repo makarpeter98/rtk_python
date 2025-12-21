@@ -2,9 +2,9 @@ import tkinter as tk
 from queue import Queue
 from threading import Lock
 
-from viewcontroller.Main_GUI.gui_measurement_view import MeasurementView
-from viewcontroller.Main_GUI.gui_graph_view import GraphView
-from viewcontroller.Main_GUI.gui_database_view import DatabaseView
+from viewcontroller.Measure_View.measurement_view import MeasurementView
+from viewcontroller.Graph_View.graph_view import GraphView
+from viewcontroller.Database_View.database_view import DatabaseView
 from viewcontroller.Main_GUI.language_manager import LanguageManager
 
 
