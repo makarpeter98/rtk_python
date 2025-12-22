@@ -3,9 +3,8 @@ from queue import Queue
 from threading import Lock
 
 class MeasurementView:
-    def __init__(self, parent, save_queue, gps_lock, my_gps_data, lang):
+    def __init__(self, parent, gps_lock, my_gps_data, lang):
         self.parent = parent
-        self.save_queue = save_queue
         self.gps_lock = gps_lock
         self.my_gps_data = my_gps_data
         self.lang = lang
@@ -49,12 +48,12 @@ class MeasurementView:
 
     def save_button_clicked(self):
         self.comment_text = self.comment_entry.get()
-
+        #print("Mentés elkezdve!")
         with self.gps_lock:
             self.my_gps_data.comment = self.comment_text
+            self.my_gps_data.store_gps_data = True
 
         units = self.lang.t("measurement_view", "units")
-
         self.status_label.config(
             text=f"{self.lang.t('measurement_view', 'status_saved')}\n"
                  f"{self.lang.t('measurement_view', 'fields', 'Latitude')}: "
@@ -64,8 +63,10 @@ class MeasurementView:
                  f"{self.lang.t('measurement_view', 'fields', 'Comment')}: "
                  f"{self.my_gps_data.comment}"
         )
-
-        self.save_queue.put(True)
+        
+        #self.my_gps_data.store_gps_data = True
+        
+        #self.save_queue.put(True)
 
     def update(self):
         with self.gps_lock:
@@ -95,6 +96,9 @@ class MeasurementView:
             self.labels["Time"].config(
                 text=f"{self.my_gps_data.time} {units['Time']}"
             )
+            """self.labels["Save"].config(
+                text=f"{self.my_gps_data.store_gps_data} {units['Save']}"
+            )"""
 
     def show(self):
         self.frame.pack(fill="both", expand=True)

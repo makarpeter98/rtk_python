@@ -204,31 +204,21 @@ class GPSHandler:
                         
                         
                         if best_lat is None and best_lat_err is None:
-                            #print(f"Lon es lon_err inicializalas lat= {lat} lat_err= {latitude_error}")
+                            print(f"Lon es lon_err inicializalas lat= {lat} lat_err= {latitude_error}")
                             best_lat = lat
                             best_lat_err = latitude_error
                         
                         if best_lon is None and best_lon_err is None:
-                            #print(f"Lon es lon_err inicializalas lon= {lon} lat= {longitude_error}")
+                            print(f"Lon es lon_err inicializalas lon= {lon} lat= {longitude_error}")
                             best_lon = lon
                             best_lon_err = longitude_error
                             
                         if latitude_error < best_lat_err:
-                            #print(f"{GREEN}talalt jobb szelesseget: {lat}{RESET}")
+                            print(f"{GREEN}talalt jobb szelesseget: {lat}{RESET}")
                             best_lat_err = latitude_error
                             best_lat = lat
                         
                         if longitude_error < best_lon_err:
-                            #print(f"{GREEN}talalt jobb hosszusagot: {lon}{RESET}")
+                            print(f"{GREEN}talalt jobb hosszusagot: {lon}{RESET}")
                             best_lon_err = longitude_error
                             best_lon = lon
-
-                    """my_gps_data.latitude = copy.deepcopy(best_lat)
-                    my_gps_data.longitude = copy.deepcopy(best_lon)
-                    my_gps_data.latitude_error = best_lat_err
-                    my_gps_data.longitude_error = best_lon_err
-                    my_gps_data.time = time_gps
-                    my_gps_data.speed = avg_speed
-                    my_gps_data.mode = f"fix:{'3D' if mode==3 else '2D' if mode==2 else 'no'}" 
-                    self.gps_data_ms_to_km(my_gps_data) 
-                    self.gps_data_time_to_bp(my_gps_data)"""

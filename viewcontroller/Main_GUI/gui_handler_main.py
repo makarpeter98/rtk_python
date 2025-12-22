@@ -9,14 +9,15 @@ from viewcontroller.Main_GUI.language_manager import LanguageManager
 
 
 class GUIHandler:
-    def __init__(self, save_queue: Queue, gps_lock: Lock, my_gps_data):
+    def __init__(self, gps_lock: Lock, my_gps_data, my_gps_data_list, clear_callback):
 
         # --- Nyelvi csomag betöltése ---
         self.lang = LanguageManager("viewcontroller/Main_GUI/lang_hu.json")
 
-        self.save_queue = save_queue
         self.gps_lock = gps_lock
         self.my_gps_data = my_gps_data
+        self.my_gps_data_list = my_gps_data_list
+        self.clear_callback = clear_callback   # <-- FONTOS
 
         self.root = tk.Tk()
         self.root.title("GPS GUI")
@@ -54,9 +55,9 @@ class GUIHandler:
 
         # Nézetek
         self.views = {
-            "measurement": MeasurementView(self.content_frame, save_queue, gps_lock, my_gps_data, self.lang),
-            "graph": GraphView(self.content_frame, self.lang, my_gps_data),
-            "db": DatabaseView(self.content_frame, self.lang)
+            "measurement": MeasurementView(self.content_frame, gps_lock, my_gps_data, self.lang),
+            "graph": GraphView(self.content_frame, self.lang, my_gps_data_list, my_gps_data, self.clear_callback),
+            "db": DatabaseView(self.content_frame, self.lang, my_gps_data_list)
         }
 
         self.current_view = None

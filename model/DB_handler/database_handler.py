@@ -43,20 +43,22 @@ class DataBaseHandler:
                 gps_data.comment = comment_text
         except (ValueError, AttributeError):
             print("Hibás formátum a comment mezőben:", comment)
-            
+        RED = "\033[31m"
+        GREEN = "\033[32m"
+        RESET = "\033[0m"
+        
         # Szép formázott log
         print(
-            f"db_handler:\n"
-            f"  Mentés:\n"
-            f"    Time:  {gps_data.time}\n"
-            f"    Lat:   {gps_data.latitude}\n"
-            f"    Lon:   {gps_data.longitude}\n"
-            f"    Speed: {gps_data.speed} km/h\n"
-            f"    Mode:  {gps_data.mode}\n"
-            f"    Comment: {gps_data.comment}\n"
-            f"    Iteráció: {measurement_iteration}\n"
-            f"    Pont: {measurement_point}\n"
-            f"    Comment: {gps_data.comment}\n"
+            f"    {GREEN}Mentés!{RESET}\n"
+            f"    Idő:              {gps_data.time}\n"
+            f"    Szélesség:        {gps_data.latitude}\n"
+            f"    Hosszúság:        {gps_data.longitude}\n"
+            f"    Sebesség:         {gps_data.speed} km/h\n"
+            f"    Mérési mód:       {gps_data.mode}\n"
+            f"    Komment:          {gps_data.comment}\n"
+            f"    Mérési iteráció:  {measurement_iteration}\n"
+            f"    Mérési pont:      {measurement_point}\n"
+            f"    GPS pont mentése: {gps_data.store_gps_data}\n"
         )
 
         # Mentés az adatbázisba
@@ -77,7 +79,9 @@ class DataBaseHandler:
             measurement_point,
             comment
         ))
-
+        
+        gps_data.store_gps_data = False
+        
         self.conn.commit()
         self.conn.close()
         
@@ -91,3 +95,80 @@ class DataBaseHandler:
 
         self.conn.close()
         return result
+        
+    def get_all_gps_data(self):
+        """Visszaadja az összes GPS adatot GPSData objektumok listájaként."""
+        from model.GPS_handler.gps_handler import GPSData  # lokális import, hogy elkerüljük a körkört
+
+        self.conn = sqlite3.connect("gps_data.db")
+        self.cursor = self.conn.cursor()
+
+        self.cursor.execute("SELECT * FROM gps_log ORDER BY id ASC")
+        rows = self.cursor.fetchall()
+        self.conn.close()
+
+        gps_list = []
+
+        for row in rows:
+            (
+                _id,
+                timestamp,
+                latitude,
+                longitude,
+                latitude_error,
+                longitude_error,
+                speed,
+                mode,
+                measurement_iteration,
+                measurement_point,
+                comment
+            ) = row
+
+            gps = GPSData()
+            gps.time = timestamp
+            gps.latitude = latitude
+            gps.longitude = longitude
+            gps.latitude_error = latitude_error
+            gps.longitude_error = longitude_error
+            gps.speed = speed
+            gps.mode = mode
+
+            # A comment mezőt visszaállítjuk eredeti formára
+            if measurement_iteration is not None and measurement_point is not None:
+                if comment:
+                    gps.comment = f"{measurement_iteration}/{measurement_point}/{comment}"
+                else:
+                    gps.comment = f"{measurement_iteration}/{measurement_point}"
+            else:
+                gps.comment = comment or ""
+
+            gps_list.append(gps)
+
+        return gps_list
+        
+    def delete_gps_data_from_db(self, lat, lon):
+        """Töröl egy GPS pontot az adatbázisból a koordináták alapján."""
+        self.conn = sqlite3.connect("gps_data.db")
+        self.cursor = self.conn.cursor()
+
+        self.cursor.execute("""
+            DELETE FROM gps_log
+            WHERE latitude = ? AND longitude = ?
+        """, (lat, lon))
+
+        self.conn.commit()
+        self.conn.close()
+
+        
+    def delete_all_gps_data_from_db(self):
+        """Törli az összes GPS adatot az adatbázisból."""
+        self.conn = sqlite3.connect("gps_data.db")
+        self.cursor = self.conn.cursor()
+
+        self.cursor.execute("DELETE FROM gps_log")
+
+        self.conn.commit()
+        self.conn.close()
+
+        
+

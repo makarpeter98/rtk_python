@@ -12,6 +12,46 @@
         "status_wait": "Várakozás GPS adatra...",
         "status_saved": "Mentve!",
         
+        
+        "fields": {
+            "Latitude": "Szélesség",
+            "Longitude": "Hosszúság",
+            "Latitude error": "Szélesség hiba",
+            "Longitude error": "Hosszúság hiba",
+            "Speed": "Sebesség",
+            "Mode": "Mód",
+            "Comment": "Megjegyzés",
+            "Time": "Idő"
+        },
+        
+        "units": {
+            "Latitude": "°",
+            "Longitude": "°",
+            "Latitude error": "m",
+            "Longitude error": "m",
+            "Speed": "km/h",
+            "Mode": "",
+            "Comment": "",
+            "Time": ""
+        }
+    },
+    
+    "graph_view": {
+        "title": "Mérés",
+        "comment_label": "Megjegyzés:",
+        "save_button": "GPS adat mentése",
+        "status_wait": "Várakozás GPS adatra...",
+        "status_saved": "Mentve!",
+        "center_button": "Középre igazít",
+        "points_number_to_show":"Pontok mutatása",
+        "Zoom_1cm_to_10km":"Zoom (1 cm → 10 km)",
+        "show_trajectory":"Trajektória mutatása",
+        "show_saved_points":"Mentett pontok mutatása",
+        "show_unsaved_points":"Nem mentett pontok mutatása",
+        "show_current_point":"Aktuális helyzet mutatása",
+        "frame_distance":"Rácsköz",
+        "clear_graph": "Grafikon kiürítése",
+        
         "fields": {
             "Latitude": "Szélesség",
             "Longitude": "Hosszúság",

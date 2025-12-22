@@ -4,7 +4,8 @@ import time
 class GPSData:
     def __init__(self):
         self._measure_fixed = False
-        self._callbacks = []  # ide tesszük a figyelőket
+        self._fixed_callbacks = []
+
         self.latitude = 0.0
         self.longitude = 0.0
         self.speed = 0.0
@@ -14,18 +15,30 @@ class GPSData:
         self.comment = ""
         self.time = None
 
+        # Csak egy flag, nem callback-eltet
+        self._store_gps_data = False
+
     @property
     def measure_fixed(self):
         return self._measure_fixed
 
     @measure_fixed.setter
     def measure_fixed(self, value):
-        if value and not self._measure_fixed:  # csak False -> True váltásnál
-            for callback in self._callbacks:
-                callback(self)  # hívjuk a callback-eket, átadjuk az objektumot
+        # Ha most lett fix először
+        if value and not self._measure_fixed:
+            for cb in self._fixed_callbacks:
+                cb()
         self._measure_fixed = value
 
-    def add_callback(self, func):
-        """Feliratkoztatunk egy callback-et"""
+    @property
+    def store_gps_data(self):
+        return self._store_gps_data
+
+    @store_gps_data.setter
+    def store_gps_data(self, value):
+        # Csak a flaget állítjuk, nincs callback
+        self._store_gps_data = value
+
+    def add_fixed_callback(self, func):
         if callable(func):
-            self._callbacks.append(func)
+            self._fixed_callbacks.append(func)
