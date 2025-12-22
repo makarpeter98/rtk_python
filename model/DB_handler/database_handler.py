@@ -132,16 +132,8 @@ class DataBaseHandler:
             gps.longitude_error = longitude_error
             gps.speed = speed
             gps.mode = mode
-
-            # A comment mezőt visszaállítjuk eredeti formára
-            if measurement_iteration is not None and measurement_point is not None:
-                if comment:
-                    gps.comment = f"{measurement_iteration}/{measurement_point}/{comment}"
-                else:
-                    gps.comment = f"{measurement_iteration}/{measurement_point}"
-            else:
-                gps.comment = comment or ""
-
+            gps.comment = f"{comment}"
+            
             gps_list.append(gps)
 
         return gps_list

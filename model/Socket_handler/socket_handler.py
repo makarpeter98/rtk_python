@@ -50,7 +50,9 @@ class SocketHandler:
                     if event == "BUTTON_PRESSED":
                         print(">>> Gomb megnyomva az Androidon!")
                         with self.gps_lock:
+                            #print(message)
                             self.my_gps_data.comment = message
+                            self.my_gps_data._store_gps_data = True
                         self.save_queue.put(True)
                     else:
                         print(f"Üzenet: {message}")
