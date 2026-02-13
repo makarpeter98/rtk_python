@@ -4,6 +4,7 @@ from .drawing import draw_grid, draw_points
 from .interactions import bind_interactions
 from .controls import build_controls
 from .state import get_grid_distance, center_on_last
+import tkinter as tk
 
 class GraphView:
     def __init__(self, parent, lang, my_gps_data_list, my_gps_data, clear_callback):
@@ -15,6 +16,8 @@ class GraphView:
         self.points = []
         self.center_lat = None
         self.center_lon = None
+                
+        self.always_center = tk.BooleanVar(value=False)
 
         self.frame = tk.Frame(parent)
 
@@ -35,12 +38,24 @@ class GraphView:
             if isinstance(gps.latitude, float) and isinstance(gps.longitude, float):
                 if not (gps.latitude == 0.0 and gps.longitude == 0.0):
                     self.points.append((gps.latitude, gps.longitude, gps.store_gps_data))
+
+                    # Első pontnál alap közép
                     if self.center_lat is None:
                         self.center_lat = gps.latitude
                         self.center_lon = gps.longitude
 
+        if not self.points:
+            return
+
+        # Always center logika
+        if hasattr(self, "always_center") and self.always_center.get():
+            lat, lon, _ = self.points[-1]
+            self.center_lat = lat
+            self.center_lon = lon
+
         pts = self.points[-self.slider.get():]
         self._draw(pts)
+
 
     def _draw(self, pts):
         self.canvas.delete("all")

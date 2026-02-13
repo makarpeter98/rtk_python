@@ -73,5 +73,26 @@
             "Comment": "",
             "Time": ""
         }
-    }
+    },
+
+
+    "database_view": {
+    	"show_unsaved": "Nem tárolt pontok mutatása",
+    	"enable_color": "Színezés engedélyezése",
+    	"delete_selected": "Kijelöltek törlése",
+
+    	"headers": {
+        	"time": "Idő",
+        	"latitude": "Szélesség",
+        	"longitude": "Hosszúság",
+        	"speed": "Sebesség",
+        	"latitude_error": "Szél. hiba",
+        	"longitude_error": "Hossz. hiba",
+        	"mode": "Mód",
+        	"comment": "Megjegyzés",
+        	"selected": "☐"
+    	}
+}
+
+
 }

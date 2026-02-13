@@ -1,0 +1,95 @@
+{
+    "menu": {
+        "measurement": "Measurement",
+        "graph": "Graph",
+        "database": "Database"
+    },
+
+    "measurement_view": {
+        "title": "Measurement",
+        "comment_label": "Comment:",
+        "save_button": "Save GPS data",
+        "status_wait": "Waiting for GPS data...",
+        "status_saved": "Saved!",
+        
+        "fields": {
+            "Latitude": "Latitude",
+            "Longitude": "Longitude",
+            "Latitude error": "Latitude error",
+            "Longitude error": "Longitude error",
+            "Speed": "Speed",
+            "Mode": "Mode",
+            "Comment": "Comment",
+            "Time": "Time"
+        },
+        
+        "units": {
+            "Latitude": "°",
+            "Longitude": "°",
+            "Latitude error": "m",
+            "Longitude error": "m",
+            "Speed": "km/h",
+            "Mode": "",
+            "Comment": "",
+            "Time": ""
+        }
+    },
+    
+    "graph_view": {
+        "title": "Measurement",
+        "comment_label": "Comment:",
+        "save_button": "Save GPS data",
+        "status_wait": "Waiting for GPS data...",
+        "status_saved": "Saved!",
+        "center_button": "Center view",
+        "points_number_to_show": "Points to display",
+        "Zoom_1cm_to_10km": "Zoom (1 cm → 10 km)",
+        "show_trajectory": "Show trajectory",
+        "show_saved_points": "Show saved points",
+        "show_unsaved_points": "Show unsaved points",
+        "show_current_point": "Show current position",
+        "frame_distance": "Grid spacing",
+        "clear_graph": "Clear graph",
+        
+        "fields": {
+            "Latitude": "Latitude",
+            "Longitude": "Longitude",
+            "Latitude error": "Latitude error",
+            "Longitude error": "Longitude error",
+            "Speed": "Speed",
+            "Mode": "Mode",
+            "Comment": "Comment",
+            "Time": "Time"
+        },
+        
+        "units": {
+            "Latitude": "°",
+            "Longitude": "°",
+            "Latitude error": "m",
+            "Longitude error": "m",
+            "Speed": "km/h",
+            "Mode": "",
+            "Comment": "",
+            "Time": ""
+        }
+    },
+
+    "database_view": {
+	"show_unsaved": "Show unsaved points",
+	"enable_color": "Enable coloring",
+	"delete_selected": "Delete selected",
+
+	"headers": {
+		"time": "Time",
+		"latitude": "Latitude",
+		"longitude": "Longitude",
+		"speed": "Speed",
+		"latitude_error": "Latitude error",
+		"longitude_error": "Longitude error",
+		"mode": "Mode",
+		"comment": "Comment",
+		"selected": "☐"
+	}
+    }
+
+}

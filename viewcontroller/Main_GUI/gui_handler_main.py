@@ -12,7 +12,13 @@ class GUIHandler:
     def __init__(self, gps_lock: Lock, my_gps_data, my_gps_data_list, clear_callback):
 
         # --- Nyelvi csomag betöltése ---
-        self.lang = LanguageManager("viewcontroller/Main_GUI/lang_hu.json")
+        self.lang = LanguageManager(
+            languages={
+                "en": "viewcontroller/Main_GUI/lang_en.json",
+                "hu": "viewcontroller/Main_GUI/lang_hu.json"
+            },
+            default_lang="en"
+        )
 
         self.gps_lock = gps_lock
         self.my_gps_data = my_gps_data

@@ -1,4 +1,3 @@
-# socket_handler.py
 import socket
 import threading
 import json
@@ -17,7 +16,7 @@ class SocketHandler:
         server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         server_socket.bind((self.HOST, self.PORT))
         server_socket.listen(5)
-        server_socket.settimeout(1.0)  # check stop_event minden 1 mp
+        server_socket.settimeout(1.0)
 
         print(f"Szerver elindítva a {self.PORT}-as porton...")
 
@@ -27,18 +26,26 @@ class SocketHandler:
                     conn, addr = server_socket.accept()
                 except socket.timeout:
                     continue
-                threading.Thread(target=self.handle_client, args=(conn, addr), daemon=True).start()
+
+                threading.Thread(
+                    target=self.handle_client,
+                    args=(conn, addr),
+                    daemon=True
+                ).start()
+
         finally:
             server_socket.close()
             print("Szerver lezárva.")
 
     def handle_client(self, conn, addr):
         print(f"Kapcsolódott: {addr}")
+
         with conn:
             with conn.makefile('r') as f:
                 for line in f:
                     if not line:
                         break
+
                     try:
                         data = json.loads(line.strip())
                         event = data.get("event")
@@ -50,9 +57,9 @@ class SocketHandler:
                     if event == "BUTTON_PRESSED":
                         print(">>> Gomb megnyomva az Androidon!")
                         with self.gps_lock:
-                            #print(message)
                             self.my_gps_data.comment = message
-                            self.my_gps_data._store_gps_data = True
+                            self.my_gps_data.store_gps_data = True
                         self.save_queue.put(True)
+
                     else:
                         print(f"Üzenet: {message}")

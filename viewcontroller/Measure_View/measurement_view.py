@@ -1,6 +1,5 @@
 import tkinter as tk
-from queue import Queue
-from threading import Lock
+
 
 class MeasurementView:
     def __init__(self, parent, gps_lock, my_gps_data, lang):
@@ -10,17 +9,41 @@ class MeasurementView:
         self.lang = lang
 
         self.labels = {}
-        self.comment_text = ""
+        self.field_name_labels = {}
 
         self.frame = tk.Frame(self.parent)
+
+        # nyelvválasztó (angol az alapértelmezett)
+        self.language_var = tk.StringVar(value="English")
+
         self._build_widgets()
 
     def _build_widgets(self):
-        tk.Label(self.frame, text=self.lang.t("measurement_view", "comment_label")).pack()
+        # ===== Language selector =====
+        lang_frame = tk.Frame(self.frame)
+        lang_frame.pack(anchor="e", padx=10, pady=5)
+
+        tk.Label(lang_frame, text="Language:").pack(side="left")
+
+        tk.OptionMenu(
+            lang_frame,
+            self.language_var,
+            "English",
+            "Magyar",
+            command=self.change_language
+        ).pack(side="left")
+
+        # ===== Comment =====
+        self.comment_label = tk.Label(
+            self.frame,
+            text=self.lang.t("measurement_view", "comment_label")
+        )
+        self.comment_label.pack()
 
         self.comment_entry = tk.Entry(self.frame, width=60)
         self.comment_entry.pack(pady=5)
 
+        # ===== Save button =====
         self.save_button = tk.Button(
             self.frame,
             text=self.lang.t("measurement_view", "save_button"),
@@ -28,17 +51,23 @@ class MeasurementView:
         )
         self.save_button.pack(pady=10)
 
-        # GPS mezők magyar nevei a JSON-ból
+        # ===== GPS fields =====
         fields = self.lang.t("measurement_view", "fields")
 
-        for key, label_hu in fields.items():
+        for key, label_text in fields.items():
             row = tk.Frame(self.frame)
             row.pack(anchor="w", padx=10)
-            tk.Label(row, text=f"{label_hu}: ", width=15, anchor="w").pack(side="left")
-            lbl = tk.Label(row, text="", width=30, anchor="w")
-            lbl.pack(side="left")
-            self.labels[key] = lbl
 
+            name_label = tk.Label(row, text=f"{label_text}: ", width=18, anchor="w")
+            name_label.pack(side="left")
+
+            value_label = tk.Label(row, text="", width=30, anchor="w")
+            value_label.pack(side="left")
+
+            self.field_name_labels[key] = name_label
+            self.labels[key] = value_label
+
+        # ===== Status =====
         self.status_label = tk.Label(
             self.frame,
             text=self.lang.t("measurement_view", "status_wait"),
@@ -46,28 +75,61 @@ class MeasurementView:
         )
         self.status_label.pack(pady=10)
 
+    # ===============================
+    # Language switching
+    # ===============================
+    def change_language(self, selection):
+        if selection == "English":
+            self.lang.load_language("en")
+        elif selection == "Magyar":
+            self.lang.load_language("hu")
+
+        self.refresh_texts()
+
+    def refresh_texts(self):
+        self.comment_label.config(
+            text=self.lang.t("measurement_view", "comment_label")
+        )
+
+        self.save_button.config(
+            text=self.lang.t("measurement_view", "save_button")
+        )
+
+        self.status_label.config(
+            text=self.lang.t("measurement_view", "status_wait")
+        )
+
+        fields = self.lang.t("measurement_view", "fields")
+        for key, label_text in fields.items():
+            self.field_name_labels[key].config(text=f"{label_text}: ")
+
+    # ===============================
+    # Button action
+    # ===============================
     def save_button_clicked(self):
-        self.comment_text = self.comment_entry.get()
-        #print("Mentés elkezdve!")
+        comment = self.comment_entry.get()
+
         with self.gps_lock:
-            self.my_gps_data.comment = self.comment_text
+            self.my_gps_data.comment = comment
             self.my_gps_data.store_gps_data = True
 
+            lat = self.my_gps_data.latitude
+            lon = self.my_gps_data.longitude
+
         units = self.lang.t("measurement_view", "units")
+
         self.status_label.config(
             text=f"{self.lang.t('measurement_view', 'status_saved')}\n"
                  f"{self.lang.t('measurement_view', 'fields', 'Latitude')}: "
-                 f"{self.my_gps_data.latitude} {units['Latitude']}, "
+                 f"{lat} {units['Latitude']}, "
                  f"{self.lang.t('measurement_view', 'fields', 'Longitude')}: "
-                 f"{self.my_gps_data.longitude} {units['Longitude']}\n"
-                 f"{self.lang.t('measurement_view', 'fields', 'Comment')}: "
-                 f"{self.my_gps_data.comment}"
+                 f"{lon} {units['Longitude']}\n"
+                 f"{self.lang.t('measurement_view', 'fields', 'Comment')}: {comment}"
         )
-        
-        #self.my_gps_data.store_gps_data = True
-        
-        #self.save_queue.put(True)
 
+    # ===============================
+    # Update GPS values
+    # ===============================
     def update(self):
         with self.gps_lock:
             units = self.lang.t("measurement_view", "units")
@@ -88,18 +150,18 @@ class MeasurementView:
                 text=f"{self.my_gps_data.speed} {units['Speed']}"
             )
             self.labels["Mode"].config(
-                text=f"{self.my_gps_data.mode} {units['Mode']}"
+                text=f"{self.my_gps_data.mode}"
             )
             self.labels["Comment"].config(
-                text=f"{self.my_gps_data.comment} {units['Comment']}"
+                text=f"{self.my_gps_data.comment}"
             )
             self.labels["Time"].config(
-                text=f"{self.my_gps_data.time} {units['Time']}"
+                text=f"{self.my_gps_data.time}"
             )
-            """self.labels["Save"].config(
-                text=f"{self.my_gps_data.store_gps_data} {units['Save']}"
-            )"""
 
+    # ===============================
+    # Visibility
+    # ===============================
     def show(self):
         self.frame.pack(fill="both", expand=True)
 
